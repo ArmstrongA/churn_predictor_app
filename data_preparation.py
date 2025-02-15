@@ -223,20 +223,14 @@ class DataPreparation:
         # Apply feature extraction to the text column
         feature_matrix = np.stack(text_column.apply(get_features))
         
-        # # Perform PCA to reduce the dimensionality to n_components
-        # pca = PCA(n_components=n_components)
-        # reduced_features = pca.fit_transform(feature_matrix)
-        
-        # # Create DataFrame for the reduced features
-        # feature_columns = [f'pca_feature_{i}' for i in range(n_components)]
-        # feature_df = pd.DataFrame(reduced_features, columns=feature_columns)
-        # Perform Random Projection to reduce the dimensionality to n_components
+        # Reduce features
         random_projection = GaussianRandomProjection(n_components=n_components, random_state=42)
         reduced_features = random_projection.fit_transform(feature_matrix)
 
         # Create DataFrame for the reduced features
         feature_columns = [f'pca_{i}' for i in range(n_components)]
         feature_df = pd.DataFrame(reduced_features, columns=feature_columns)
+        
         
         return feature_df
 
@@ -266,7 +260,7 @@ class DataPreparation:
         reduced_features_df = self.extract_and_reduce_features(df['customer_text'])
 
         # Concatenate the reduced features with the original DataFrame
-        df = pd.concat([df, reduced_features_df], axis=1, ignore_index=True)
+        df = pd.concat([df, reduced_features_df], axis=1)
         
         logger.info("Data preparation completed successfully")
         return df, validation_report
@@ -275,5 +269,6 @@ class DataPreparation:
 if __name__ == "__main__":
     prep = DataPreparation()
     processed_df, validation_report = prep.prepare_data()
+    processed_df = processed_df.drop(processed_df.columns[0], axis=1)
     # Use only in training
     # processed_df.to_csv('.data/model_data.csv', index=False) 
