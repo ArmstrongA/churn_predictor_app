@@ -1,4 +1,4 @@
-# baseline_model.py
+# model.py
 
 import pandas as pd
 import numpy as np

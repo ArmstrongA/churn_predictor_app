@@ -167,13 +167,6 @@ class DataPreparation:
     
     def extract_sentiment(self, text_column, model_name="distilbert-base-uncased-finetuned-sst-2-english"):
         """Extracts sentiment from a text column and returns the updated DataFrame.
-        
-        Args:
-            text_column (pd.Series): Column containing text data
-            model_name (str): Hugging Face model name for sentiment analysis
-            
-        Returns:
-            pd.Series: Series containing sentiment labels
         """
         # Load model and tokenizer once
         tokenizer = AutoTokenizer.from_pretrained(model_name)
@@ -231,7 +224,6 @@ class DataPreparation:
         feature_columns = [f'pca_{i}' for i in range(n_components)]
         feature_df = pd.DataFrame(reduced_features, columns=feature_columns)
         
-        
         return feature_df
 
     def prepare_data(self, data):
@@ -245,22 +237,29 @@ class DataPreparation:
             df = df.drop_duplicates()
         
         # Feature engineering
-        df = self.engineer_basic_features(df)
-        df = self.engineer_advanced_features(df)
+        df_ = df.copy()
+        # drop unecessary columns
+        columns_to_drop = ['CustomerID', 'Count', 'Country', 'State', 'City', 'Zip Code', 'Lat Long', 'Latitude', 
+                   'Longitude', 'Churn Value', 'Churn Score', 'CLTV', 'Churn Reason', 'conversation', 'customer_text']
+        for col in columns_to_drop:
+            if col in df.columns:
+                df_ = df_.drop(col, axis=1)
+        df_ = self.engineer_basic_features(df_)
+        df_ = self.engineer_advanced_features(df_)
         
         # Encoding and scaling
-        df = self.encode_categorical_features(df)
-        df = self.scale_numerical_features(df)
+        df_ = self.encode_categorical_features(df_)
+        df_ = self.scale_numerical_features(df_)
 
         # Add text features
-        df['customer_sentiment'] = self.extract_sentiment(df['customer_text'])
+        df_['customer_sentiment'] = self.extract_sentiment(df['customer_text'])
         label_encoder = LabelEncoder()
-        df['sentiment_encoded'] = label_encoder.fit_transform(df['customer_sentiment'])
+        df_['sentiment_encoded'] = label_encoder.fit_transform(df_['customer_sentiment'])
         # Extract features and reduce them to 10 components
         reduced_features_df = self.extract_and_reduce_features(df['customer_text'])
 
         # Concatenate the reduced features with the original DataFrame
-        df = pd.concat([df, reduced_features_df], axis=1)
+        df = pd.concat([df_, reduced_features_df], axis=1)
         
         logger.info("Data preparation completed successfully")
         return df, validation_report
