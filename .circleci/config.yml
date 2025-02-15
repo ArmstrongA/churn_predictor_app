@@ -27,7 +27,7 @@ jobs:
           name: Run Tests
           command: |
             . venv/bin/activate
-            pytest tests/
+            pytest tests/ -v
       # Docker steps
       - run:
           name: Build and Push Docker Image
