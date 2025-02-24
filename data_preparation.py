@@ -1,8 +1,8 @@
-# data_preparation3.py
+# data_preparation.py
 
 import pandas as pd
 import numpy as np
-from sklearn.preprocessing import LabelEncoder, StandardScaler, PowerTransformer
+from sklearn.preprocessing import LabelEncoder, PowerTransformer, RobustScaler
 from sklearn.impute import SimpleImputer
 import joblib
 import logging
@@ -20,7 +20,7 @@ logger = logging.getLogger(__name__)
 class DataPreparation:
     def __init__(self):
         self.label_encoders = {}
-        self.scaler = StandardScaler()
+        self.scaler = RobustScaler()
         self.power_transformer = PowerTransformer()
         self.imputer = SimpleImputer(strategy='mean')
         
@@ -269,5 +269,4 @@ if __name__ == "__main__":
     prep = DataPreparation()
     processed_df, validation_report = prep.prepare_data()
     processed_df = processed_df.drop(processed_df.columns[0], axis=1)
-    # Use only in training
-    # processed_df.to_csv('.data/model_data.csv', index=False) 
+   
