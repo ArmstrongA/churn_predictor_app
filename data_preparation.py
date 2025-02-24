@@ -259,7 +259,7 @@ class DataPreparation:
         reduced_features_df = self.extract_and_reduce_features(df['customer_text'])
 
         # Concatenate the reduced features with the original DataFrame
-        df = pd.concat([df_, reduced_features_df], axis=1)
+        df = pd.concat([df_, reduced_features_df], axis=0).reset_index(drop=True)
         
         logger.info("Data preparation completed successfully")
         return df, validation_report
